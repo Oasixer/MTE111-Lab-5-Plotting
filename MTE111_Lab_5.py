@@ -27,18 +27,27 @@ linear_y = [data.iloc[initial_end[col]-1:linear_end_abs[col], col].values.reshap
 linear_regressor = [LinearRegression() for col in cols]  # create object for the class
 for col in cols:
     linear_regressor[col].fit(linear_x[col], linear_y[col])  # perform linear regression
+
+standard_dev = [data.iloc[initial_end[col]-1:linear_end_abs[col], col].values.std() for col in cols]
+print(f'standard deviations: {standard_dev}')
+
+
 linear_fit_line = [linear_regressor[col].predict(linear_x[col]) for col in cols]  # make predictions
 
 initial_lines = [None, None, None]
 linear_points = [None, None, None]
 linear_fits = [None, None, None]
 final_lines = [None, None, None]
+error_bars = [None, None, None]
+
+print(linear_x[0][0][0])
 
 for col in cols:
     initial_lines[col], = plt.plot(initial_x[col], initial_y[col], color=colors[0][col], linewidth=1, label=f'Sample.{col+1} Primary stage')
     linear_points[col] = plt.scatter(linear_x[col], linear_y[col], color=colors[1][col], s=30, marker='x', label=f'Sample.{col+1} Secondary stage data points')
     linear_fits[col], = plt.plot(linear_x[col], linear_fit_line[col], color=colors[1][col], label=f'Sample.{col+1} Secondary stage linear regression')
     final_lines[col], = plt.plot(tertiary_x[col], tertiary_y[col], color=colors[2][col], label=f'Sample.{col+1} Final stage')
+    #error_bars[col] = plt.errorbar(np.delete(linear_x[col],np.s_[1:-1], axis=0), np.delete(linear_fit_line[col],np.s_[1:-1], axis=0), yerr=standard_dev[col], fmt='none')
 
 first_legend = plt.legend([tuple(initial_lines), tuple(linear_fits), tuple(linear_points), tuple(final_lines)], ['Primary stage data points', 'Secondary stage fit line', 'Secondary stage data points', 'Final stage data points'], numpoints=1,
                handler_map={tuple: HandlerTuple(ndivide=None)}, loc='lower right')
@@ -47,8 +56,15 @@ first_legend = plt.legend([tuple(initial_lines), tuple(linear_fits), tuple(linea
 ax = plt.gca().add_artist(first_legend)
 
  #Create another legend for the second line.
-plt.legend([tuple(i) for i in zip(initial_lines, linear_points, linear_fits, final_lines)], ['Sample 1', 'Sample 2', 'Sample 3', 'Sample 4'], numpoints=1,
-               handler_map={tuple: HandlerTuple(ndivide=None)}, loc='right')
+#precision = 4
+plt.legend([tuple(i) for i in zip(initial_lines, linear_points, linear_fits, final_lines)], ['Sample 1', 'Sample 2', 'Sample 3'], numpoints=1, handler_map={tuple: HandlerTuple(ndivide=None)}, loc='right')
+
+props = dict(boxstyle='round', facecolor='white', alpha=0.2)
+
+textstr = f'Secondary stage standard deviations\n(error estimates for linear regression fit lines)\nSample 1: {round(standard_dev[0], 9)}\nSample 2: {round(standard_dev[1], 9)}\nSample 3: {round(standard_dev[2], 9)}'
+
+
+plt.text(0, 0.14, textstr, fontsize=9,verticalalignment='top', bbox=props)
 
 plt.xlabel('Time (s)')
 plt.ylabel('Strain (mm/mm)')
