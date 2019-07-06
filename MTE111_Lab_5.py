@@ -10,7 +10,6 @@ data = pd.read_csv('data.csv') # Outputs dataframe
 initial_end = (9,3,2) # By inspection, end of primary stage
 cols = (0,1,2)
 fractures = [data.iloc[:, col].last_valid_index() for col in cols]
-#print(fractures)
 linear_end_relative = (-3,0,0) # By inspection, end of secondary/linear 
 linear_end_abs = [fractures[col]+linear_end_relative[col] for col in cols]
 index_col = 3
@@ -24,22 +23,16 @@ initial_y = [data.iloc[:initial_end[col], col].values.reshape(-1, 1) for col in 
 tertiary_x = [data.iloc[linear_end_abs[col]-1:, index_col].values.reshape(-1, 1)  for col in cols]
 tertiary_y = [data.iloc[linear_end_abs[col]-1:, col].values.reshape(-1, 1) for col in cols]
 linear_x = [data.iloc[initial_end[col]-1:linear_end_abs[col], index_col].values.reshape(-1, 1)  for col in cols]
-# -1 means that calculate the dimension of rows, but have 1 column
 linear_y = [data.iloc[initial_end[col]-1:linear_end_abs[col], col].values.reshape(-1, 1)  for col in cols]
 linear_regressor = [LinearRegression() for col in cols]  # create object for the class
-print(linear_x)
-print(linear_y)
 for col in cols:
     linear_regressor[col].fit(linear_x[col], linear_y[col])  # perform linear regression
 linear_fit_line = [linear_regressor[col].predict(linear_x[col]) for col in cols]  # make predictions
 
-initial_lines = [1,2,3]
-linear_points = [1,2,3]
-linear_fits = [1,2,3]
-final_lines = [1,2,3]
-test = zip(initial_lines, linear_points, linear_fits, final_lines)
-test = [tuple(i) for i in test]
-print(test)
+initial_lines = [None, None, None]
+linear_points = [None, None, None]
+linear_fits = [None, None, None]
+final_lines = [None, None, None]
 
 for col in cols:
     initial_lines[col], = plt.plot(initial_x[col], initial_y[col], color=colors[0][col], linewidth=1, label=f'Sample.{col+1} Primary stage')
@@ -53,12 +46,8 @@ first_legend = plt.legend([tuple(initial_lines), tuple(linear_fits), tuple(linea
 # Add the legend manually to the current Axes.
 ax = plt.gca().add_artist(first_legend)
 
-test = zip(initial_lines, linear_points, linear_fits, final_lines)
-test = [tuple(i) for i in test]
-print(test)
-
  #Create another legend for the second line.
-plt.legend(test, ['Sample 1', 'Sample 2', 'Sample 3', 'Sample 4'], numpoints=1,
+plt.legend([tuple(i) for i in zip(initial_lines, linear_points, linear_fits, final_lines)], ['Sample 1', 'Sample 2', 'Sample 3', 'Sample 4'], numpoints=1,
                handler_map={tuple: HandlerTuple(ndivide=None)}, loc='right')
 
 plt.xlabel('Time (s)')
